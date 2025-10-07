@@ -1,0 +1,13 @@
+version: '4'
+services:
+  mysql:
+    image: mysql:8.3.0
+    container_name: mysql_angadi
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: user_service_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./docker/mysql:/var/lib/mysql
+      - ./data/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
