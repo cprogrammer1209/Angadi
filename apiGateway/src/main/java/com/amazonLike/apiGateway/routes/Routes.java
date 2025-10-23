@@ -1,35 +1,46 @@
 package com.amazonLike.apiGateway.routes;
 
-
-import org.springframework.cloud.gateway.server.mvc.handler.GatewayRouterFunctions;
-import org.springframework.cloud.gateway.server.mvc.handler.HandlerFunctions;
+import org.springframework.cloud.gateway.route.RouteLocator;
+import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.servlet.function.RequestPredicate;
-import org.springframework.web.servlet.function.RequestPredicates;
-import org.springframework.web.servlet.function.RouterFunction;
-import org.springframework.web.servlet.function.ServerResponse;
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.web.server.SecurityWebFilterChain;
 
 @Configuration
+@EnableWebFluxSecurity
 public class Routes {
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         http
-                .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()  // Allow all requests
+                .authorizeExchange(exchange -> exchange
+                        .anyExchange().permitAll()  // Allow all requests
                 )
                 .csrf(csrf -> csrf.disable());
         return http.build();
     }
 
     @Bean
-    public RouterFunction<ServerResponse> userRoutes(){
-        return GatewayRouterFunctions.route("user-service")
-                .route(RequestPredicates.path("/user/**"),
-                        HandlerFunctions.http("http://localhost:8080"))
+    public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
+        return builder.routes()
+                // User Service Routes
+                .route("user-service-route", r -> r
+                        .path("/user/**")
+                        .uri("lb://USERSERVICE"))
                 .build();
+    }
+
+    @Bean
+    public RouteLocator orderServiceRouter(RouteLocatorBuilder builder){
+
+        return builder.routes()
+                .route("order-service",r -> r
+                        .path("/order/**")
+                        .uri("lb://ORDERSERVICE"))
+                .build();
+
+
     }
 }
