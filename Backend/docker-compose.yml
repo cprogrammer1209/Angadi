@@ -1,0 +1,11 @@
+version: '3.9'
+
+services:
+  ServiceDiscovery:
+    build: ./ServiceDiscovery
+    container_name: ServiceDiscovery
+    image: ServiceDiscovery:latest
+    ports:
+      -"8761:8761"
+    networks:
+      - micro-net
